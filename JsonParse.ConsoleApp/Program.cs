@@ -14,6 +14,9 @@ do
     keys = Console.ReadLine()!.Split(',').Select(TrimStr).ToArray();
 } while (keys.Length is 0);
 
+var watch = new System.Diagnostics.Stopwatch();
+watch.Start();
+
 foreach (var filePath in directory)
 {
     FileStream file = null!;
@@ -51,7 +54,8 @@ foreach (var filePath in directory)
     }
 }
 
-Console.WriteLine("Press Enter to exit.");
+watch.Stop();
+Console.WriteLine($"Elapsed time: {watch.Elapsed} Press Enter to exit.");
 Console.ReadLine();
 
 
