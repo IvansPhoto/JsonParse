@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Text.Json;
+using JsonParse.ConsoleApp;
 
 Console.WriteLine("Enter a path to a JSON file. Press Enter to use the current directory.");
 var path = Console.ReadLine();
@@ -15,44 +15,34 @@ do
     keys = Console.ReadLine()!.Split(',').Select(TrimStr).ToArray();
 } while (keys.Length is 0);
 
+SetupMethod:
+string? method;
+do
+{
+    Console.WriteLine(@"Enter a method to parse:\n S - for Sync\n SP - for Sync parallel\n A - for Async\n AP - for Async parallel\n .");
+    method = Console.ReadLine();
+} while (string.IsNullOrEmpty(method));
+
 var watch = new Stopwatch();
 watch.Start();
 
-foreach (var filePath in directory)
+switch (method)
 {
-    FileStream file = null!;
-    JsonDocument json = null!;
-    try
-    {
-        file = File.OpenRead(filePath);
-        json = JsonDocument.Parse(file);
-        var isFound = true;
-        var currentNode = json.RootElement;
-        Console.Write(string.Concat(filePath.AsSpan(filePath.LastIndexOf('\\') + 1, filePath.Length - (filePath.LastIndexOf('\\') + 1)), ": "));
-
-        foreach (var t in keys)
-        {
-            if (currentNode.TryGetProperty(t, out var node))
-            {
-                currentNode = node;
-            }
-            else
-            {
-                isFound = false;
-                break;
-            }
-        }
-
-        if (isFound)
-            Console.WriteLine(currentNode);
-        else
-            Console.WriteLine("None");
-    }
-    finally
-    {
-        file!.Dispose();
-        json!.Dispose();
-    }
+    case "S":
+        ParseMethods.ReadSync(directory, keys);
+        break;
+    case "SP":
+        ParseMethods.ReadSyncParallel(directory, keys);
+        break;
+    case "A":
+        await ParseMethods.ReadAsync(directory, keys);
+        break;
+    case "AP":
+        await ParseMethods.ReadAsyncParallel(directory, keys);
+        break;
+    default:
+        Console.WriteLine("The letter is wrong.");
+        goto SetupMethod;
 }
 
 watch.Stop();
@@ -64,3 +54,6 @@ string TrimStr(string str) => str.Trim();
 
 bool SelectJson(string str) => str.Contains(".json", StringComparison.InvariantCultureIgnoreCase) &&
                                str.IndexOf(".json", StringComparison.InvariantCultureIgnoreCase) == str.Length - 5;
+
+
+           
