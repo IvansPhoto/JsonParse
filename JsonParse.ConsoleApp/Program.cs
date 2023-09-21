@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 
 Console.WriteLine("Enter a path to a JSON file. Press Enter to use the current directory.");
 var path = Console.ReadLine();
@@ -14,7 +15,7 @@ do
     keys = Console.ReadLine()!.Split(',').Select(TrimStr).ToArray();
 } while (keys.Length is 0);
 
-var watch = new System.Diagnostics.Stopwatch();
+var watch = new Stopwatch();
 watch.Start();
 
 foreach (var filePath in directory)
